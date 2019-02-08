@@ -233,7 +233,7 @@ func containerChanged(container *v1.Container, oldHash uint64) (uint64, uint64, 
 
 // ShouldContainerBeRestarted checks whether a container needs to be restarted.
 // TODO(yifan): Think about how to refactor this.
-func shouldContainerBeRestarted(container *v1.Container, pod *v1.Pod, status *cri.ContainerStatus) bool {
+func shouldContainerBeRestarted(container *v1.Container, v1Pod *v1.Pod, status *cri.ContainerStatus) bool {
 	// If the container was never started before, we should start it.
 	// NOTE(random-liu): If all historical containers were GC'd, we'll also return true here.
 	if status == nil {
@@ -248,14 +248,14 @@ func shouldContainerBeRestarted(container *v1.Container, pod *v1.Pod, status *cr
 		return true
 	}
 	// Check RestartPolicy for dead container
-	if pod.Spec.RestartPolicy == v1.RestartPolicyNever {
-		log.LOGGER.Infof("Already ran container %q of pod %q, do nothing", container.Name, pod)
+	if v1Pod.Spec.RestartPolicy == v1.RestartPolicyNever {
+		log.LOGGER.Infof("Already ran container %q of pod %q, do nothing", container.Name, v1Pod)
 		return false
 	}
-	if pod.Spec.RestartPolicy == v1.RestartPolicyOnFailure {
+	if v1Pod.Spec.RestartPolicy == v1.RestartPolicyOnFailure {
 		// Check the exit code.
 		if status.ExitCode == 0 {
-			log.LOGGER.Infof("Already successfully ran container %q of pod %q, do nothing", container.Name, pod.Name)
+			log.LOGGER.Infof("Already successfully ran container %q of pod %q, do nothing", container.Name, v1Pod.Name)
 			return false
 		}
 	}
